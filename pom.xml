@@ -12,14 +12,27 @@
     <artifactId>cida-web</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>cida-web</name>
-    <description>cida-web</description>
+    <description>Uma plataforma onde é possível guardar, descobrir e compartilhar scripts.</description>
     <url/>
     <licenses>
         <license/>
     </licenses>
     <developers>
-        <developer/>
+        <developer>
+            <id>luuke</id>
+            <name>Lucas Matheus</name>
+            <email>lucas.matheus@mv.com.br</email>
+            <url>http://www.example.com/jdoe</url>
+            <organization>MV</organization>
+            <organizationUrl>http://www.mv.com.br</organizationUrl>
+            <roles>
+                <role>architect</role>
+                <role>developer</role>
+            </roles>
+            <timezone>South America/Brasília</timezone>
+        </developer>
     </developers>
+
     <scm>
         <connection/>
         <developerConnection/>
@@ -80,10 +93,13 @@
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>2.5.0</version>
         </dependency>
-        <!-- Para projetos Spring Boot -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
         </dependency>
     </dependencies>
 

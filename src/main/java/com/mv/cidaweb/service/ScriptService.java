@@ -25,19 +25,19 @@ public class ScriptService {
 
     public ArrayList<ScriptDTO> getAllScripts() {
         return scriptRepository.findAll().stream().map(a ->
-                new ScriptDTO(a.getId(), new PessoaDTO(a.getAutor().getNome(),a.getAutor().getCorAvatar()), a.getDataCriacao(), a.getTitulo(), a.getConteudo(), a.getDescricao(), a.getCurtidas())
+                new ScriptDTO(a.getId(), new PessoaDTO(a.getAutor().getNome(), a.getAutor().getCorAvatar()), a.getDataCriacao(), a.getTitulo(), a.getConteudo(), a.getDescricao(), a.getCurtidas())
         ).collect(Collectors.toCollection(ArrayList::new));
     }
 
     public ScriptDTO getScriptById(Long id) {
         return scriptRepository.findById(id).map(a ->
-                new ScriptDTO(a.getId(), new PessoaDTO(a.getAutor().getNome(),a.getAutor().getCorAvatar()), a.getDataCriacao(), a.getTitulo(), a.getConteudo(), a.getDescricao(), a.getCurtidas())
+                new ScriptDTO(a.getId(), new PessoaDTO(a.getAutor().getNome(), a.getAutor().getCorAvatar()), a.getDataCriacao(), a.getTitulo(), a.getConteudo(), a.getDescricao(), a.getCurtidas())
         ).orElseThrow(() -> new ObjectNotFoundException(String.format("Script com id %d não encontrado", id)));
     }
 
     public ScriptDTO getScriptByNome(String nome) {
         return scriptRepository.findByTitulo(nome).map(a ->
-                new ScriptDTO(a.getId(), new PessoaDTO(a.getAutor().getNome(),a.getAutor().getCorAvatar()), a.getDataCriacao(), a.getTitulo(), a.getConteudo(), a.getDescricao(), a.getCurtidas())
+                new ScriptDTO(a.getId(), new PessoaDTO(a.getAutor().getNome(), a.getAutor().getCorAvatar()), a.getDataCriacao(), a.getTitulo(), a.getConteudo(), a.getDescricao(), a.getCurtidas())
         ).orElseThrow(() -> new ObjectNotFoundException(String.format("Script com nome %s não encontrado", nome)));
     }
 
@@ -46,7 +46,7 @@ public class ScriptService {
         script.setTitulo(scriptDTO.titulo());
         script.setConteudo(scriptDTO.conteudo());
         var a = scriptRepository.save(script);
-        return new ScriptDTO(a.getId(), new PessoaDTO(a.getAutor().getNome(),a.getAutor().getCorAvatar()), a.getDataCriacao(), a.getTitulo(), a.getConteudo(), a.getDescricao(), a.getCurtidas());
+        return new ScriptDTO(a.getId(), new PessoaDTO(a.getAutor().getNome(), a.getAutor().getCorAvatar()), a.getDataCriacao(), a.getTitulo(), a.getConteudo(), a.getDescricao(), a.getCurtidas());
     }
 
     @Transactional
@@ -56,27 +56,27 @@ public class ScriptService {
         var novoComentario = new Comentario(comentario.conteudo(), LocalDateTime.now(), pessoa, 0);
         script.addComentario(novoComentario);
         scriptRepository.save(script);
-        return new ComentarioDTO(pessoa.getId(), comentario.conteudo(), novoComentario.getDataHora(), new PessoaDTO(pessoa.getNome(),pessoa.getCorAvatar()),0);
+        return new ComentarioDTO(pessoa.getId(), comentario.conteudo(), novoComentario.getDataHora(), new PessoaDTO(pessoa.getNome(), pessoa.getCorAvatar()), 0);
     }
 
     public ArrayList<ComentarioDTO> getComentarios(Long scriptId) {
         var script = scriptRepository.findById(scriptId).orElseThrow(() -> new ObjectNotFoundException(String.format("Script com id %d não encontrado", scriptId)));
         return script.getComentarios().stream().map(a ->
-                new ComentarioDTO(a.getId().toString(), a.getComentario(), a.getDataHora(), new PessoaDTO(a.getAutor().getNome(),a.getAutor().getCorAvatar()),a.getCurtidas())
+                new ComentarioDTO(a.getId().toString(), a.getComentario(), a.getDataHora(), new PessoaDTO(a.getAutor().getNome(), a.getAutor().getCorAvatar()), a.getCurtidas())
         ).collect(Collectors.toCollection(ArrayList::new));
     }
 
     public ComentarioDTO getComentario(Long scriptId) {
         var script = scriptRepository.findById(scriptId).orElseThrow(() -> new ObjectNotFoundException(String.format("Script com id %d não encontrado", scriptId)));
         var comentario = script.getComentarios().get(script.getComentarios().size() - 1);
-        return new ComentarioDTO(comentario.getId().toString(), comentario.getComentario(), comentario.getDataHora(), new PessoaDTO(comentario.getAutor().getNome(),comentario.getAutor().getCorAvatar()),comentario.getCurtidas());
+        return new ComentarioDTO(comentario.getId().toString(), comentario.getComentario(), comentario.getDataHora(), new PessoaDTO(comentario.getAutor().getNome(), comentario.getAutor().getCorAvatar()), comentario.getCurtidas());
     }
 
     public ScriptDTO saveScript(ScriptDTO scriptDTO) {
         var pessoa = pessoaRepository.findByNome(scriptDTO.autor().nome()).orElseThrow(() -> new ObjectNotFoundException(String.format("Pessoa com nome %s não encontrada", scriptDTO.autor().nome())));
         var script = new Script(scriptDTO.titulo(), scriptDTO.conteudo(), scriptDTO.descricao(), LocalDateTime.now(), pessoa);
         var a = scriptRepository.save(script);
-        return new ScriptDTO(a.getId(), new PessoaDTO(a.getAutor().getNome(),a.getAutor().getCorAvatar()), a.getDataCriacao(), a.getTitulo(), a.getConteudo(), a.getDescricao(), a.getCurtidas());
+        return new ScriptDTO(a.getId(), new PessoaDTO(a.getAutor().getNome(), a.getAutor().getCorAvatar()), a.getDataCriacao(), a.getTitulo(), a.getConteudo(), a.getDescricao(), a.getCurtidas());
     }
 
     public ScriptComComentariosDTO getScriptByIdComComentarios(Long id) {
@@ -90,15 +90,15 @@ public class ScriptService {
     }
 
     private ScriptComComentariosDTO getScriptComComentariosDTO(Script script) {
-        return new ScriptComComentariosDTO(script.getId(), new PessoaDTO(script.getAutor().getNome(),script.getAutor().getCorAvatar()), script.getDataCriacao(), script.getTitulo(), script.getConteudo(), script.getDescricao(), script.getCurtidas(), script.getComentarios().stream().map(a ->
-                new ComentarioDTO(a.getId().toString(), a.getComentario(), a.getDataHora(), new PessoaDTO(a.getAutor().getNome(),a.getAutor().getCorAvatar()),a.getCurtidas())
+        return new ScriptComComentariosDTO(script.getId(), new PessoaDTO(script.getAutor().getNome(), script.getAutor().getCorAvatar()), script.getDataCriacao(), script.getTitulo(), script.getConteudo(), script.getDescricao(), script.getCurtidas(), script.getComentarios().stream().map(a ->
+                new ComentarioDTO(a.getId().toString(), a.getComentario(), a.getDataHora(), new PessoaDTO(a.getAutor().getNome(), a.getAutor().getCorAvatar()), a.getCurtidas())
         ).collect(Collectors.toCollection(ArrayList::new)));
     }
 
     public ArrayList<ScriptDTO> getAllScriptsByAutor(String nome) {
         var pessoa = pessoaRepository.findByNome(nome).orElseThrow(() -> new ObjectNotFoundException(String.format("Pessoa com nome %s não encontrada", nome)));
         return scriptRepository.findScriptByAutor(pessoa).stream().map(a ->
-                new ScriptDTO(a.getId(), new PessoaDTO(a.getAutor().getNome(),a.getAutor().getCorAvatar()), a.getDataCriacao(), a.getTitulo(), a.getConteudo(), a.getDescricao(), a.getCurtidas())
+                new ScriptDTO(a.getId(), new PessoaDTO(a.getAutor().getNome(), a.getAutor().getCorAvatar()), a.getDataCriacao(), a.getTitulo(), a.getConteudo(), a.getDescricao(), a.getCurtidas())
         ).collect(Collectors.toCollection(ArrayList::new));
     }
 }
