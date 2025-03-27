@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -29,6 +31,10 @@ public class Comentario {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "script_id")
     private Script script;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "curtidas_comentarios", joinColumns = @JoinColumn(name = "comentario_id"), inverseJoinColumns = @JoinColumn(name = "pessoa_id"))
+    private List<Pessoa> pessoasQueCurtiram = new ArrayList<>();
 
     public Comentario(String comentario, LocalDateTime dataHora, Pessoa autor, long curtidas) {
         this.comentario = comentario;

@@ -7,6 +7,7 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -28,8 +29,12 @@ public class Script {
     @JoinColumn(name = "autor_id")
     private Pessoa autor;
 
-    @Column(columnDefinition = "bigint default 0")
-    private long curtidas;
+//    @Column(columnDefinition = "bigint default 0")
+//    private long curtidas;
+
+    @ManyToMany(fetch = FetchType.EAGER )
+    @JoinTable(name = "curtidas_scripts", joinColumns = @JoinColumn(name = "script_id"), inverseJoinColumns = @JoinColumn(name = "pessoa_id"))
+    private List<Pessoa> pessoasQueCurtiram = new ArrayList<>();
 
     @OneToMany(mappedBy = "script", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comentario> comentarios = new ArrayList<>();
@@ -43,6 +48,18 @@ public class Script {
     }
 
     public Script() {
+    }
+
+    public long getCurtidas() {
+        return this.pessoasQueCurtiram.size();
+    }
+
+    public void adicionarCurtida(Pessoa pessoa) {
+        this.pessoasQueCurtiram.add(pessoa);
+    }
+
+    public void removerCurtida(Pessoa pessoa) {
+        this.pessoasQueCurtiram.remove(pessoa);
     }
 
     public void addComentario(Comentario comentario) {

@@ -1,6 +1,7 @@
 package com.mv.cidaweb.service;
 
 import com.mv.cidaweb.exceptions.ObjectNotFoundException;
+import com.mv.cidaweb.exceptions.PrivilegiosInsuficientesException;
 import com.mv.cidaweb.model.beans.Comentario;
 import com.mv.cidaweb.model.beans.Script;
 import com.mv.cidaweb.model.dtos.*;
@@ -8,6 +9,8 @@ import com.mv.cidaweb.model.repository.PessoaRepository;
 import com.mv.cidaweb.model.repository.ScriptRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -42,7 +45,12 @@ public class ScriptService {
     }
 
     public ScriptDTO updateScript(ScriptDTO scriptDTO, Long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Script script = scriptRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException(String.format("Script com id %d não encontrado", id)));
+        if (!script.getAutor().getNome().equals(authentication.getName())) {
+            throw new PrivilegiosInsuficientesException("Você não tem permissão para editar este script");
+        }
+
         script.setTitulo(scriptDTO.titulo());
         script.setConteudo(scriptDTO.conteudo());
         var a = scriptRepository.save(script);
@@ -100,5 +108,18 @@ public class ScriptService {
         return scriptRepository.findScriptByAutor(pessoa).stream().map(a ->
                 new ScriptDTO(a.getId(), new PessoaDTO(a.getAutor().getNome(), a.getAutor().getCorAvatar()), a.getDataCriacao(), a.getTitulo(), a.getConteudo(), a.getDescricao(), a.getCurtidas())
         ).collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    public ScriptDTO curtirDescurtirScript(Long scriptId) {
+        var script = scriptRepository.findById(scriptId).orElseThrow(() -> new ObjectNotFoundException(String.format("Script com id %d não encontrado", scriptId)));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        var pessoa = pessoaRepository.findByLogin(authentication.getName()).orElseThrow(() -> new ObjectNotFoundException(String.format("Pessoa com nome %s não encontrada", authentication.getName())));
+        if (script.getPessoasQueCurtiram().contains(pessoa)) {
+            script.removerCurtida(pessoa);
+        } else {
+            script.adicionarCurtida(pessoa);
+        }
+        var a = scriptRepository.save(script);
+        return new ScriptDTO(a.getId(), new PessoaDTO(a.getAutor().getNome(), a.getAutor().getCorAvatar()), a.getDataCriacao(), a.getTitulo(), a.getConteudo(), a.getDescricao(), a.getCurtidas());
     }
 }

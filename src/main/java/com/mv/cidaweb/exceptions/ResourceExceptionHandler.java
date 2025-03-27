@@ -18,4 +18,11 @@ public class ResourceExceptionHandler {
                 , e.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
+
+    @ExceptionHandler(PrivilegiosInsuficientesException.class)
+    ResponseEntity<StandardException> privilegiosInsuficientes(PrivilegiosInsuficientesException e, ServletRequest request) {
+        StandardException error = new StandardException(LocalDateTime.now(ZoneId.of("UTC")), HttpStatus.NOT_FOUND.value()
+                , e.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+    }
 }

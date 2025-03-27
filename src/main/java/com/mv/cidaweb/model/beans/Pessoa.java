@@ -30,6 +30,14 @@ public class Pessoa {
     @OneToMany(mappedBy = "autor", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comentario> comentarios = new ArrayList<>();
 
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "curtidas_scripts", joinColumns = @JoinColumn(name = "script_id"), inverseJoinColumns = @JoinColumn(name = "pessoa_id"))
+    private List<Script> scriptsCurtidos = new ArrayList<>();
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "curtidas_comentarios", joinColumns = @JoinColumn(name = "comentario_id"), inverseJoinColumns = @JoinColumn(name = "pessoa_id"))
+    private List<Comentario> comentariosCurtidos = new ArrayList<>();
+
     @Pattern(regexp = "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$")
     @Column(columnDefinition = "varchar(7) default '#2197D9'")
     private String corAvatar;
@@ -42,6 +50,14 @@ public class Pessoa {
         this.login = login;
         this.password = password;
         this.role = role;
+    }
+
+    public boolean removeScriptCurtido(Script script) {
+        return scriptsCurtidos.remove(script);
+    }
+
+    public boolean addScriptCurtido(Script script) {
+        return scriptsCurtidos.add(script);
     }
 }
 

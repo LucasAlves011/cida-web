@@ -88,4 +88,9 @@ public class CidaController {
     public ComentarioDTO getComentario(@PathVariable Long script_id) throws ObjectNotFoundException {
         return scriptService.getComentario(script_id);
     }
+
+    @PostMapping("/curtir-descurtir/{script_id}")
+    public ResponseEntity<ScriptDTO> curtirDescurtirScript(@PathVariable Long script_id) throws ObjectNotFoundException {
+        return ResponseEntity.ok().body(scriptService.curtirDescurtirScript(script_id));
+    }
 }
