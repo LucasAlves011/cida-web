@@ -25,22 +25,30 @@ public class Comentario {
     @JoinColumn(name = "autor_id")
     private Pessoa autor;
 
-    @Column(columnDefinition = "bigint default 0")
-    private long curtidas;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "script_id")
     private Script script;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "curtidas_comentarios", joinColumns = @JoinColumn(name = "comentario_id"), inverseJoinColumns = @JoinColumn(name = "pessoa_id"))
+    @JoinTable(name = "curtidas_comentarios", joinColumns = @JoinColumn(name = "comentario_id"), inverseJoinColumns = @JoinColumn(name = "pessoa_id"), foreignKey = @ForeignKey(name = "fk_comentario_id"), inverseForeignKey = @ForeignKey(name = "fk_pessoa_id"))
     private List<Pessoa> pessoasQueCurtiram = new ArrayList<>();
 
-    public Comentario(String comentario, LocalDateTime dataHora, Pessoa autor, long curtidas) {
+    public void adicionarCurtida(Pessoa pessoa) {
+        this.pessoasQueCurtiram.add(pessoa);
+    }
+
+    public void removerCurtida(Pessoa pessoa) {
+        this.pessoasQueCurtiram.remove(pessoa);
+    }
+
+    public long getCurtidas() {
+        return this.pessoasQueCurtiram.size();
+    }
+
+    public Comentario(String comentario, LocalDateTime dataHora, Pessoa autor) {
         this.comentario = comentario;
         this.dataHora = dataHora;
         this.autor = autor;
-        this.curtidas = curtidas;
     }
 
     public Comentario() {

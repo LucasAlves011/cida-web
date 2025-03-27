@@ -29,10 +29,7 @@ public class Script {
     @JoinColumn(name = "autor_id")
     private Pessoa autor;
 
-//    @Column(columnDefinition = "bigint default 0")
-//    private long curtidas;
-
-    @ManyToMany(fetch = FetchType.EAGER )
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "curtidas_scripts", joinColumns = @JoinColumn(name = "script_id"), inverseJoinColumns = @JoinColumn(name = "pessoa_id"))
     private List<Pessoa> pessoasQueCurtiram = new ArrayList<>();
 

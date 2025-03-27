@@ -24,9 +24,20 @@ public class CidaController {
     private final ScriptService scriptService;
     private final PessoaService pessoaService;
 
+
     public CidaController(ScriptService scriptService, PessoaService pessoaService) {
         this.scriptService = scriptService;
         this.pessoaService = pessoaService;
+    }
+
+    @GetMapping("/listar")
+    public ResponseEntity<ArrayList<ScriptDTO>> listAllScripts() {
+        return ResponseEntity.ok().body(scriptService.getAllScripts());
+    }
+
+    @GetMapping("/listar/meus-favoritos")
+    public ResponseEntity<ArrayList<ScriptDTO>> listarMeusScriptsEFavoritos() {
+        return ResponseEntity.ok().body(scriptService.listarMeusScriptsEFavoritos());
     }
 
     @GetMapping("/id/{id}")
@@ -47,11 +58,6 @@ public class CidaController {
     @GetMapping("/nome/{nome}/com-comentarios")
     public ResponseEntity<ScriptComComentariosDTO> getScriptComComentarios(@PathVariable String nome) throws ObjectNotFoundException {
         return ResponseEntity.ok().body(scriptService.getScriptByNomeComComentarios(nome));
-    }
-
-    @GetMapping("/listar")
-    public ResponseEntity<ArrayList<ScriptDTO>> listAllScripts() {
-        return ResponseEntity.ok().body(scriptService.getAllScripts());
     }
 
     @GetMapping("/listar/nome/{nome}")
@@ -92,5 +98,10 @@ public class CidaController {
     @PostMapping("/curtir-descurtir/{script_id}")
     public ResponseEntity<ScriptDTO> curtirDescurtirScript(@PathVariable Long script_id) throws ObjectNotFoundException {
         return ResponseEntity.ok().body(scriptService.curtirDescurtirScript(script_id));
+    }
+
+    @PostMapping("/curtir-descurtir/comentario/{comentario_id}")
+    public ResponseEntity<ComentarioDTO> curtirDescurtirComentario(@PathVariable Long comentario_id) throws ObjectNotFoundException {
+        return ResponseEntity.ok().body(scriptService.curtirDescurtirComentario(comentario_id));
     }
 }

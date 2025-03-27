@@ -5,10 +5,10 @@ import com.mv.cidaweb.exceptions.PrivilegiosInsuficientesException;
 import com.mv.cidaweb.model.beans.Comentario;
 import com.mv.cidaweb.model.beans.Script;
 import com.mv.cidaweb.model.dtos.*;
+import com.mv.cidaweb.model.repository.ComentarioRepository;
 import com.mv.cidaweb.model.repository.PessoaRepository;
 import com.mv.cidaweb.model.repository.ScriptRepository;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -20,11 +20,15 @@ import java.util.stream.Collectors;
 @Service
 public class ScriptService {
 
-    @Autowired
-    ScriptRepository scriptRepository;
+    private final ScriptRepository scriptRepository;
+    private final PessoaRepository pessoaRepository;
+    private final ComentarioRepository comentarioRepository;
 
-    @Autowired
-    PessoaRepository pessoaRepository;
+    public ScriptService(ScriptRepository scriptRepository, PessoaRepository pessoaRepository, ComentarioRepository comentarioRepository) {
+        this.scriptRepository = scriptRepository;
+        this.pessoaRepository = pessoaRepository;
+        this.comentarioRepository = comentarioRepository;
+    }
 
     public ArrayList<ScriptDTO> getAllScripts() {
         return scriptRepository.findAll().stream().map(a ->
@@ -61,7 +65,7 @@ public class ScriptService {
     public ComentarioDTO addComentario(ComentarioInDTO comentario, Long scriptId) {
         var script = scriptRepository.findById(scriptId).orElseThrow(() -> new ObjectNotFoundException(String.format("Script com id %d não encontrado", scriptId)));
         var pessoa = pessoaRepository.findByNome(comentario.autor().nome()).orElseThrow(() -> new ObjectNotFoundException(String.format("Pessoa com nome %s não encontrada", comentario.autor())));
-        var novoComentario = new Comentario(comentario.conteudo(), LocalDateTime.now(), pessoa, 0);
+        var novoComentario = new Comentario(comentario.conteudo(), LocalDateTime.now(), pessoa);
         script.addComentario(novoComentario);
         scriptRepository.save(script);
         return new ComentarioDTO(pessoa.getId(), comentario.conteudo(), novoComentario.getDataHora(), new PessoaDTO(pessoa.getNome(), pessoa.getCorAvatar()), 0);
@@ -121,5 +125,35 @@ public class ScriptService {
         }
         var a = scriptRepository.save(script);
         return new ScriptDTO(a.getId(), new PessoaDTO(a.getAutor().getNome(), a.getAutor().getCorAvatar()), a.getDataCriacao(), a.getTitulo(), a.getConteudo(), a.getDescricao(), a.getCurtidas());
+    }
+
+    public ComentarioDTO curtirDescurtirComentario(Long comentarioId) {
+        var comentario = comentarioRepository.findComentarioById(comentarioId).orElseThrow(() -> new ObjectNotFoundException(String.format("Comentário com id %d não encontrado", comentarioId)));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        var pessoa = pessoaRepository.findByLogin(authentication.getName()).orElseThrow(() -> new ObjectNotFoundException(String.format("Pessoa com nome %s não encontrada", authentication.getName())));
+        if (comentario.getPessoasQueCurtiram().contains(pessoa)) {
+            comentario.removerCurtida(pessoa);
+        } else {
+            comentario.adicionarCurtida(pessoa);
+        }
+        var a = comentarioRepository.save(comentario);
+        return new ComentarioDTO(a.getId().toString(), a.getComentario(), a.getDataHora(), new PessoaDTO(a.getAutor().getNome(), a.getAutor().getCorAvatar()), a.getCurtidas());
+    }
+
+    //TODO: AINDA NÃO FUNCIONA CORRETAMENTE, VERIFICAR O PROBLEMA DE RELACINAMENTO
+    public ArrayList<ScriptDTO> listarMeusScriptsEFavoritos() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        var pessoa = pessoaRepository.findByLogin(authentication.getName()).orElseThrow(() -> new ObjectNotFoundException(String.format("Pessoa com nome %s não encontrada", authentication.getName())));
+
+        var meusScripts = scriptRepository.findScriptByAutor(pessoa).stream().map(a ->
+                new ScriptDTO(a.getId(), new PessoaDTO(a.getAutor().getNome(), a.getAutor().getCorAvatar()), a.getDataCriacao(), a.getTitulo(), a.getConteudo(), a.getDescricao(), a.getCurtidas())
+        ).collect(Collectors.toCollection(ArrayList::new));
+
+        var scriptsCurtidos = pessoa.getScriptsCurtidos().stream().map(a ->
+                new ScriptDTO(a.getId(), new PessoaDTO(a.getAutor().getNome(), a.getAutor().getCorAvatar()), a.getDataCriacao(), a.getTitulo(), a.getConteudo(), a.getDescricao(), a.getCurtidas())
+        ).collect(Collectors.toCollection(ArrayList::new));
+
+        meusScripts.addAll(scriptsCurtidos);
+        return meusScripts;
     }
 }
