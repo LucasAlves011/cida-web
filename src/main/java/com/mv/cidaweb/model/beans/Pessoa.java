@@ -35,7 +35,7 @@ public class Pessoa {
     private List<Script> scriptsCurtidos = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "curtidas_comentarios", joinColumns = @JoinColumn(name = "comentario_id"), inverseJoinColumns = @JoinColumn(name = "pessoa_id"))
+    @JoinTable(name = "curtidas_comentarios", joinColumns = @JoinColumn(name = "pessoa_id"), inverseJoinColumns = @JoinColumn(name = "comentario_id"))
     private List<Comentario> comentariosCurtidos = new ArrayList<>();
 
     @Pattern(regexp = "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$")
@@ -52,12 +52,22 @@ public class Pessoa {
         this.role = role;
     }
 
-    public boolean removeScriptCurtido(Script script) {
-        return scriptsCurtidos.remove(script);
+    // ADICIONAR E REMOVER CURTIDA DE SCRIPT
+    public void removeScriptCurtido(Script script) {
+        scriptsCurtidos.remove(script);
     }
 
-    public boolean addScriptCurtido(Script script) {
-        return scriptsCurtidos.add(script);
+    public void addScriptCurtido(Script script) {
+        scriptsCurtidos.add(script);
+    }
+
+    // ADICIONAR E REMOVER CURTIDA DE COMENTARIO
+    public void removeComentarioCurtido(Comentario comentario) {
+        comentariosCurtidos.remove(comentario);
+    }
+
+    public void addComentarioCurtido(Comentario comentario) {
+        comentariosCurtidos.add(comentario);
     }
 }
 

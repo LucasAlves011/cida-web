@@ -18,7 +18,7 @@ public class Comentario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(columnDefinition = "CHARACTER LARGE OBJECT")
+//    @Column(columnDefinition = "CHARACTER LARGE OBJECT")
     private String comentario;
     private LocalDateTime dataHora;
 
@@ -30,8 +30,7 @@ public class Comentario {
     @JoinColumn(name = "script_id")
     private Script script;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "curtidas_comentarios", joinColumns = @JoinColumn(name = "comentario_id"), inverseJoinColumns = @JoinColumn(name = "pessoa_id"), foreignKey = @ForeignKey(name = "fk_comentario_id"), inverseForeignKey = @ForeignKey(name = "fk_pessoa_id"))
+    @ManyToMany(mappedBy = "comentariosCurtidos",fetch = FetchType.EAGER)
     private List<Pessoa> pessoasQueCurtiram = new ArrayList<>();
 
     public void adicionarCurtida(Pessoa pessoa) {
