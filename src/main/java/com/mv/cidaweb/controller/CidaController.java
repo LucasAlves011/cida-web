@@ -82,7 +82,7 @@ public class CidaController {
     })
     @PostMapping("/{script_id}/comentario")
     public ComentarioDTO salvarComentario(@RequestBody ComentarioInDTO comentario, @PathVariable Long script_id) throws ObjectNotFoundException {
-        return scriptService.addComentario(comentario, script_id);
+        return scriptService.addComentario(comentario.comentario(), script_id);
     }
 
     @GetMapping("/{script_id}/comentarios")

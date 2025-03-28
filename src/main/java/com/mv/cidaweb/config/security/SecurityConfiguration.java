@@ -14,6 +14,7 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -45,8 +46,11 @@ public class SecurityConfiguration {
         http.csrf(AbstractHttpConfigurer::disable).cors(AbstractHttpConfigurer::disable)
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/authenticate").permitAll()
-                        .anyRequest().authenticated())
+                        .requestMatchers("/authenticate").permitAll().requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/favicon.ico/**").permitAll()
+                        .anyRequest().authenticated()
+                ).headers(headers ->
+                        headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
                 .httpBasic(Customizer.withDefaults()).oauth2ResourceServer(
                         conf -> conf.jwt(jwt -> jwt.decoder(jwtDecoder()))
                 );

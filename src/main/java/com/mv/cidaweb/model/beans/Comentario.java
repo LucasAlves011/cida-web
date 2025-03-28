@@ -18,6 +18,7 @@ public class Comentario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(columnDefinition = "CHARACTER LARGE OBJECT")
     private String comentario;
     private LocalDateTime dataHora;
 

@@ -20,6 +20,7 @@ public class Script {
     @Column(unique = true, nullable = false)
     private String titulo;
 
+    @Column(columnDefinition = "CHARACTER LARGE OBJECT", length = 40000)
     private String conteudo;
     private String descricao;
     private LocalDateTime dataCriacao;
@@ -29,8 +30,7 @@ public class Script {
     @JoinColumn(name = "autor_id")
     private Pessoa autor;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "curtidas_scripts", joinColumns = @JoinColumn(name = "script_id"), inverseJoinColumns = @JoinColumn(name = "pessoa_id"))
+    @ManyToMany(mappedBy = "scriptsCurtidos")
     private List<Pessoa> pessoasQueCurtiram = new ArrayList<>();
 
     @OneToMany(mappedBy = "script", cascade = CascadeType.ALL, orphanRemoval = true)

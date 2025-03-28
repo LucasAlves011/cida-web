@@ -62,13 +62,14 @@ public class ScriptService {
     }
 
     @Transactional
-    public ComentarioDTO addComentario(ComentarioInDTO comentario, Long scriptId) {
+    public ComentarioDTO addComentario(String comentario, Long scriptId) {
         var script = scriptRepository.findById(scriptId).orElseThrow(() -> new ObjectNotFoundException(String.format("Script com id %d não encontrado", scriptId)));
-        var pessoa = pessoaRepository.findByNome(comentario.autor().nome()).orElseThrow(() -> new ObjectNotFoundException(String.format("Pessoa com nome %s não encontrada", comentario.autor())));
-        var novoComentario = new Comentario(comentario.conteudo(), LocalDateTime.now(), pessoa);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        var pessoa = pessoaRepository.findByLogin(authentication.getName()).orElseThrow(() -> new ObjectNotFoundException(String.format("Pessoa com nome %s não encontrada", authentication.getName())));
+        var novoComentario = new Comentario(comentario, LocalDateTime.now(), pessoa);
         script.addComentario(novoComentario);
         scriptRepository.save(script);
-        return new ComentarioDTO(pessoa.getId(), comentario.conteudo(), novoComentario.getDataHora(), new PessoaDTO(pessoa.getNome(), pessoa.getCorAvatar()), 0);
+        return new ComentarioDTO(pessoa.getId(), comentario, novoComentario.getDataHora(), new PessoaDTO(pessoa.getNome(), pessoa.getCorAvatar()), 0);
     }
 
     public ArrayList<ComentarioDTO> getComentarios(Long scriptId) {
@@ -118,11 +119,16 @@ public class ScriptService {
         var script = scriptRepository.findById(scriptId).orElseThrow(() -> new ObjectNotFoundException(String.format("Script com id %d não encontrado", scriptId)));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         var pessoa = pessoaRepository.findByLogin(authentication.getName()).orElseThrow(() -> new ObjectNotFoundException(String.format("Pessoa com nome %s não encontrada", authentication.getName())));
+
         if (script.getPessoasQueCurtiram().contains(pessoa)) {
             script.removerCurtida(pessoa);
+            pessoa.removeScriptCurtido(script);
         } else {
+            pessoa.addScriptCurtido(script);
             script.adicionarCurtida(pessoa);
         }
+
+        pessoaRepository.save(pessoa);
         var a = scriptRepository.save(script);
         return new ScriptDTO(a.getId(), new PessoaDTO(a.getAutor().getNome(), a.getAutor().getCorAvatar()), a.getDataCriacao(), a.getTitulo(), a.getConteudo(), a.getDescricao(), a.getCurtidas());
     }

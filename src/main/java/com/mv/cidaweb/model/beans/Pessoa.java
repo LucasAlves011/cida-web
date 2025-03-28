@@ -31,7 +31,7 @@ public class Pessoa {
     private List<Comentario> comentarios = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "curtidas_scripts", joinColumns = @JoinColumn(name = "script_id"), inverseJoinColumns = @JoinColumn(name = "pessoa_id"))
+    @JoinTable(name = "curtidas_scripts", joinColumns = @JoinColumn(name = "pessoa_id"), inverseJoinColumns = @JoinColumn(name = "script_id") )
     private List<Script> scriptsCurtidos = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.EAGER)
