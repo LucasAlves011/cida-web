@@ -6,7 +6,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AuthenticationService {
-    private JwtService jwtService;
+
+    private final JwtService jwtService;
 
     public AuthenticationService(JwtService jwtService) {
         this.jwtService = jwtService;

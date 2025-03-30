@@ -1,5 +1,8 @@
-package com.mv.cidaweb.exceptions;
+package com.mv.cidaweb.controller;
 
+import com.mv.cidaweb.model.exceptions.ObjectNotFoundException;
+import com.mv.cidaweb.model.exceptions.PrivilegiosInsuficientesException;
+import com.mv.cidaweb.model.exceptions.StandardException;
 import jakarta.servlet.ServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

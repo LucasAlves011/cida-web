@@ -1,4 +1,4 @@
-package com.mv.cidaweb.exceptions;
+package com.mv.cidaweb.model.exceptions;
 
 import java.io.Serial;
 
