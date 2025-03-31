@@ -1,15 +1,10 @@
 package com.mv.cidaweb.controller;
 
-import com.mv.cidaweb.exceptions.ObjectNotFoundException;
-import com.mv.cidaweb.model.dtos.ComentarioDTO;
-import com.mv.cidaweb.model.dtos.ComentarioInDTO;
 import com.mv.cidaweb.model.dtos.ScriptComComentariosDTO;
 import com.mv.cidaweb.model.dtos.ScriptDTO;
-import com.mv.cidaweb.service.PessoaService;
+import com.mv.cidaweb.model.dtos.ScriptEntradaDTO;
+import com.mv.cidaweb.model.exceptions.ObjectNotFoundException;
 import com.mv.cidaweb.service.ScriptService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,15 +14,12 @@ import java.util.ArrayList;
 @RestController
 @RequestMapping("/script")
 @Tag(name = "Scripts", description = "Operações relacionadas a scripts")
-public class CidaController {
+public class ScriptController {
 
     private final ScriptService scriptService;
-    private final PessoaService pessoaService;
 
-
-    public CidaController(ScriptService scriptService, PessoaService pessoaService) {
+    public ScriptController(ScriptService scriptService) {
         this.scriptService = scriptService;
-        this.pessoaService = pessoaService;
     }
 
     @GetMapping("/listar")
@@ -71,37 +63,14 @@ public class CidaController {
     }
 
     @PostMapping("/salvar")
-    public ResponseEntity<ScriptDTO> saveScript(@RequestBody ScriptDTO scriptDTO) {
-        return ResponseEntity.ok().body(scriptService.saveScript(scriptDTO));
+    public ResponseEntity<ScriptDTO> saveScript(@RequestBody ScriptEntradaDTO scriptEntradaDTO) {
+        return ResponseEntity.ok().body(scriptService.saveScript(scriptEntradaDTO));
     }
 
-    @Operation(summary = "Adicionar comentário a um script")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Comentário adicionado com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Script não encontrado")
-    })
-    @PostMapping("/{script_id}/comentario")
-    public ComentarioDTO salvarComentario(@RequestBody ComentarioInDTO comentario, @PathVariable Long script_id) throws ObjectNotFoundException {
-        return scriptService.addComentario(comentario.comentario(), script_id);
-    }
-
-    @GetMapping("/{script_id}/comentarios")
-    public ArrayList<ComentarioDTO> getComentarios(@PathVariable Long script_id) throws ObjectNotFoundException {
-        return scriptService.getComentarios(script_id);
-    }
-
-    @GetMapping("/comentario/{script_id}")
-    public ComentarioDTO getComentario(@PathVariable Long script_id) throws ObjectNotFoundException {
-        return scriptService.getComentario(script_id);
-    }
 
     @PostMapping("/curtir-descurtir/{script_id}")
     public ResponseEntity<ScriptDTO> curtirDescurtirScript(@PathVariable Long script_id) throws ObjectNotFoundException {
         return ResponseEntity.ok().body(scriptService.curtirDescurtirScript(script_id));
     }
 
-    @PostMapping("/curtir-descurtir/comentario/{comentario_id}")
-    public ResponseEntity<ComentarioDTO> curtirDescurtirComentario(@PathVariable Long comentario_id) throws ObjectNotFoundException {
-        return ResponseEntity.ok().body(scriptService.curtirDescurtirComentario(comentario_id));
-    }
 }
