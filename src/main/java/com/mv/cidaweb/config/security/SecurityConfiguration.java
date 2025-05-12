@@ -61,6 +61,7 @@ public class SecurityConfiguration {
                     .requestMatchers("/h2-console/**").permitAll()
                     .requestMatchers("/favicon.ico").permitAll()
                     .anyRequest().authenticated() // Exige JWT
+//                    .anyRequest().permitAll() // Exige JWT
             ).httpBasic(basic -> basic
                     .authenticationEntryPoint(new BasicAuthEntryPoint()) // Configuração especial para /authenticate
             ).anonymous(AbstractHttpConfigurer::disable)// Desabilita Basic Auth globalmente

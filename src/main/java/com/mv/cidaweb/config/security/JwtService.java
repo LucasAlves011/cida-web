@@ -1,5 +1,6 @@
 package com.mv.cidaweb.config.security;
 
+import com.mv.cidaweb.model.dtos.TokenDTO;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
@@ -19,7 +20,7 @@ public class JwtService {
         this.encoder = encoder;
     }
 
-    public String generateToken(Authentication authentication) {
+    public TokenDTO generateToken(Authentication authentication) {
         Instant now = Instant.now();
         String scope = authentication
                 .getAuthorities().stream().map(GrantedAuthority::getAuthority)
@@ -33,7 +34,8 @@ public class JwtService {
                 .claim("scope", scope)
                 .build();
 
-        return encoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
+        var token =  encoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
+        return new TokenDTO(token, "jwt", TEMPO_DE_VIDA_TOKEN_SEGUNDOS);
     }
 
 }

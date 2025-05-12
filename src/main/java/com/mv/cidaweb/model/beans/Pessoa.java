@@ -1,7 +1,6 @@
 package com.mv.cidaweb.model.beans;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,6 +22,7 @@ public class Pessoa {
 
     private String password;
     private UserRole role;
+    private String idFoto;
 
     @OneToMany(mappedBy = "autor", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Script> scripts = new ArrayList<>();
@@ -31,25 +31,26 @@ public class Pessoa {
     private List<Comentario> comentarios = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "curtidas_scripts", joinColumns = @JoinColumn(name = "pessoa_id"), inverseJoinColumns = @JoinColumn(name = "script_id") )
+    @JoinTable(name = "curtidas_scripts", joinColumns = @JoinColumn(name = "pessoa_id"), inverseJoinColumns = @JoinColumn(name = "script_id"))
     private List<Script> scriptsCurtidos = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "curtidas_comentarios", joinColumns = @JoinColumn(name = "pessoa_id"), inverseJoinColumns = @JoinColumn(name = "comentario_id"))
     private List<Comentario> comentariosCurtidos = new ArrayList<>();
 
-    @Pattern(regexp = "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$")
-    @Column(columnDefinition = "varchar(7) default '#2197D9'")
-    private String corAvatar;
-
     public Pessoa() {
     }
 
-    public Pessoa(String nome, String login, String password, UserRole role) {
+    public Pessoa(String nome, String login, String password, UserRole role, String idFoto) {
         this.nome = nome;
         this.login = login;
         this.password = password;
         this.role = role;
+        this.idFoto = idFoto;
+    }
+
+    public String getIdFoto() {
+        return idFoto.replace(".png", "");
     }
 
     // ADICIONAR E REMOVER CURTIDA DE SCRIPT

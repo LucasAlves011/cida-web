@@ -1,12 +1,13 @@
 package com.mv.cidaweb.service;
 
-import com.mv.cidaweb.model.beans.Comentario;
 import com.mv.cidaweb.model.beans.Script;
-import com.mv.cidaweb.model.dtos.*;
+import com.mv.cidaweb.model.dtos.PessoaDTO;
+import com.mv.cidaweb.model.dtos.ScriptComComentariosDTO;
+import com.mv.cidaweb.model.dtos.ScriptDTO;
+import com.mv.cidaweb.model.dtos.ScriptEntradaDTO;
 import com.mv.cidaweb.model.exceptions.ObjectNotFoundException;
 import com.mv.cidaweb.model.exceptions.PrivilegiosInsuficientesException;
 import com.mv.cidaweb.model.repository.ScriptRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -60,7 +61,7 @@ public class ScriptService {
         script.setTitulo(scriptDTO.titulo());
         script.setConteudo(scriptDTO.conteudo());
         var a = scriptRepository.save(script);
-        return new ScriptDTO(a.getId(), new PessoaDTO(a.getAutor().getNome(), a.getAutor().getCorAvatar()), a.getDataCriacao(), a.getTitulo(), a.getConteudo(),
+        return new ScriptDTO(a.getId(), new PessoaDTO(a.getAutor().getNome(), a.getAutor().getIdFoto()), a.getDataCriacao(), a.getTitulo(), a.getConteudo(),
                 a.getDescricao(), a.getCurtidas(), verificarSePessoaCurtiuOuNao(a));
     }
 
@@ -85,7 +86,7 @@ public class ScriptService {
 
     private ScriptComComentariosDTO getScriptComComentariosDTO(Script script) {
         var comentarios = comentarioService.getComentarios(script.getId());
-        return new ScriptComComentariosDTO(script.getId(), new PessoaDTO(script.getAutor().getNome(), script.getAutor().getCorAvatar()), script.getDataCriacao(),
+        return new ScriptComComentariosDTO(script.getId(), new PessoaDTO(script.getAutor().getNome(), script.getAutor().getIdFoto()), script.getDataCriacao(),
                 script.getTitulo(), script.getConteudo(), script.getDescricao(), script.getCurtidas(), comentarios, verificarSePessoaCurtiuOuNao(script));
     }
 
@@ -109,7 +110,7 @@ public class ScriptService {
 
         pessoaService.save(pessoa);
         var a = scriptRepository.save(script);
-        return new ScriptDTO(a.getId(), new PessoaDTO(a.getAutor().getNome(), a.getAutor().getCorAvatar()), a.getDataCriacao(), a.getTitulo(), a.getConteudo(),
+        return new ScriptDTO(a.getId(), new PessoaDTO(a.getAutor().getNome(),a.getAutor().getIdFoto()), a.getDataCriacao(), a.getTitulo(), a.getConteudo(),
                 a.getDescricao(), a.getCurtidas(), verificarSePessoaCurtiuOuNao(a));
     }
 
@@ -120,8 +121,8 @@ public class ScriptService {
     }
 
     private ScriptDTO scriptToScriptDTO(Script script) {
-        return new ScriptDTO(script.getId(), new PessoaDTO(script.getAutor().getNome(), script.getAutor().getCorAvatar()),
-                script.getDataCriacao(), script.getTitulo(), script.getConteudo(),script.getDescricao(), script.getCurtidas(), verificarSePessoaCurtiuOuNao(script));
+        return new ScriptDTO(script.getId(), new PessoaDTO(script.getAutor().getNome(), script.getAutor().getIdFoto()),
+                script.getDataCriacao(), script.getTitulo(), script.getConteudo(), script.getDescricao(), script.getCurtidas(), verificarSePessoaCurtiuOuNao(script));
     }
 
     public ArrayList<ScriptDTO> listarMeusScriptsEFavoritos() {

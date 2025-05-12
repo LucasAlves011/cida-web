@@ -38,19 +38,9 @@ class PessoaRepositoryTest {
     }
 
     @Test
-    @DisplayName("Deve retornar um erro quando a cor for passada num formato inválido")
-    void findByNome2() {
-        PessoaDTO pessoa = new PessoaDTO("fulano", "azul");
-        this.createPessoa(pessoa);
-        assertThrows(ConstraintViolationException.class, () -> {
-            pessoaRepository.findByNome("fulano");
-        });
-    }
-
-    @Test
     @DisplayName("Deve retornar verdadeira quando existir uma pessoa na base com o login informado")
     void findByLogin() {
-        Pessoa pessoa = new Pessoa("Lucas Matheus", "lucas" ,"lucas123", UserRole.USER);
+        Pessoa pessoa = new Pessoa("Lucas Matheus", "lucas" ,"lucas123", UserRole.USER, "FOTO");
         entityManager.persist(pessoa);
         Pessoa result = pessoaRepository.findByLogin("lucas").get();
         assertEquals(pessoa, result);
@@ -59,7 +49,6 @@ class PessoaRepositoryTest {
     private Pessoa createPessoa(PessoaDTO pessoaDTO){
         Pessoa pessoa = new Pessoa();
         pessoa.setNome(pessoaDTO.nome());
-        pessoa.setCorAvatar(pessoaDTO.corAvatar());
         this.entityManager.persist(pessoa);
         return pessoa;
     }

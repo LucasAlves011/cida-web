@@ -35,19 +35,19 @@ public class ComentarioService {
         var novoComentario = new Comentario(comentario, LocalDateTime.now(), pessoa);
         script.addComentario(novoComentario);
         scriptService.save(script);
-        return new ComentarioDTO(pessoa.getId(), comentario, novoComentario.getDataHora(), new PessoaDTO(pessoa.getNome(), pessoa.getCorAvatar()), 0, false);
+        return new ComentarioDTO(pessoa.getId(), comentario, novoComentario.getDataHora(), new PessoaDTO(pessoa.getNome(), pessoa.getIdFoto()), 0, false);
     }
 
     public ArrayList<ComentarioDTO> getComentarios(Long scriptId) {
         var script = scriptService.findById(scriptId).orElseThrow(() -> new ObjectNotFoundException(String.format("Script com id %d não encontrado", scriptId)));
         return script.getComentarios().stream().map(a ->
-                new ComentarioDTO(a.getId().toString(), a.getComentario(), a.getDataHora(), new PessoaDTO(a.getAutor().getNome(), a.getAutor().getCorAvatar()), a.getCurtidas(), verificarSePessoaCurtiuOuNao(a))
+                new ComentarioDTO(a.getId().toString(), a.getComentario(), a.getDataHora(), new PessoaDTO(a.getAutor().getNome(), a.getAutor().getIdFoto()), a.getCurtidas(), verificarSePessoaCurtiuOuNao(a))
         ).collect(Collectors.toCollection(ArrayList::new));
     }
 
     public ComentarioDTO getComentario(Long comentario_id) {
         var comentario = comentarioRepository.findById(comentario_id).orElseThrow(() -> new ObjectNotFoundException(String.format("Comentário com id %d não encontrado", comentario_id)));
-        return new ComentarioDTO(comentario.getId().toString(), comentario.getComentario(), comentario.getDataHora(), new PessoaDTO(comentario.getAutor().getNome(), comentario.getAutor().getCorAvatar()), comentario.getCurtidas(), verificarSePessoaCurtiuOuNao(comentario));
+        return new ComentarioDTO(comentario.getId().toString(), comentario.getComentario(), comentario.getDataHora(), new PessoaDTO(comentario.getAutor().getNome(), comentario.getAutor().getIdFoto()), comentario.getCurtidas(), verificarSePessoaCurtiuOuNao(comentario));
     }
 
     public ComentarioDTO curtirDescurtirComentario(Long comentarioId) {
@@ -65,7 +65,7 @@ public class ComentarioService {
 
         pessoaService.save(pessoa);
         var a = comentarioRepository.save(comentario);
-        return new ComentarioDTO(a.getId().toString(), a.getComentario(), a.getDataHora(), new PessoaDTO(a.getAutor().getNome(), a.getAutor().getCorAvatar()), a.getCurtidas(), verificarSePessoaCurtiuOuNao(a));
+        return new ComentarioDTO(a.getId().toString(), a.getComentario(), a.getDataHora(), new PessoaDTO(a.getAutor().getNome(), pessoa.getIdFoto()), a.getCurtidas(), verificarSePessoaCurtiuOuNao(a));
     }
 
     private boolean verificarSePessoaCurtiuOuNao(Comentario comentario) {

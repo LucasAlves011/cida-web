@@ -1,6 +1,7 @@
 package com.mv.cidaweb.service;
 
 import com.mv.cidaweb.config.security.JwtService;
+import com.mv.cidaweb.model.dtos.TokenDTO;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +14,7 @@ public class AuthenticationService {
         this.jwtService = jwtService;
     }
 
-    public String authenticate(Authentication authentication) {
+    public TokenDTO authenticate(Authentication authentication) {
         return jwtService.generateToken(authentication);
     }
 }
