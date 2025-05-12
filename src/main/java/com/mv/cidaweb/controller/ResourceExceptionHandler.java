@@ -1,5 +1,6 @@
 package com.mv.cidaweb.controller;
 
+import com.mv.cidaweb.model.exceptions.CredenciaisInvalidasException;
 import com.mv.cidaweb.model.exceptions.ObjectNotFoundException;
 import com.mv.cidaweb.model.exceptions.PrivilegiosInsuficientesException;
 import com.mv.cidaweb.model.exceptions.StandardException;
@@ -27,5 +28,12 @@ public class ResourceExceptionHandler {
         StandardException error = new StandardException(LocalDateTime.now(ZoneId.of("UTC")), HttpStatus.NOT_FOUND.value()
                 , e.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+    }
+
+    @ExceptionHandler(CredenciaisInvalidasException.class)
+    ResponseEntity<StandardException> credenciaisInvalidasException(CredenciaisInvalidasException e, ServletRequest request) {
+        StandardException error = new StandardException(LocalDateTime.now(ZoneId.of("UTC")), HttpStatus.NOT_FOUND.value()
+                , e.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 }

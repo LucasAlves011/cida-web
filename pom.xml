@@ -119,6 +119,13 @@
                     <target>${java.version}</target>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>com.mv.cidaweb.CidaWebApplication</mainClass>
+                </configuration>
+            </plugin>
         </plugins>
         <resources>
             <resource>

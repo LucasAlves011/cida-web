@@ -1,3 +1,4 @@
 Manifest-Version: 1.0
-Main-Class: com.mv.cidaweb.CidaWebApplication
+Main-Class: org.springframework.boot.loader.JarLauncher
+Start-Class: com.mv.cidaweb.CidaWebApplication
 

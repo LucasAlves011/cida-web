@@ -60,6 +60,7 @@ public class SecurityConfiguration {
                     .requestMatchers("/cadastrar").permitAll()
                     .requestMatchers("/h2-console/**").permitAll()
                     .requestMatchers("/favicon.ico").permitAll()
+                    .requestMatchers("/image/**").permitAll()
                     .anyRequest().authenticated() // Exige JWT
 //                    .anyRequest().permitAll() // Exige JWT
             ).httpBasic(basic -> basic

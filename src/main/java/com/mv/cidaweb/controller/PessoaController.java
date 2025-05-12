@@ -33,7 +33,6 @@ public class PessoaController {
                                              @RequestPart String password,
                                              @RequestPart String email,
                                              @RequestPart MultipartFile image) throws IOException {
-        System.out.println(nomeSobrenome);
 
         if (image.isEmpty()) {
             return ResponseEntity.badRequest().body("Arquivo vazio");
