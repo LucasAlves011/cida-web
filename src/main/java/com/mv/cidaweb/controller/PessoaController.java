@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Base64;
 import java.util.UUID;
 
 @RestController()
@@ -59,7 +60,8 @@ public class PessoaController {
     }
 
     @GetMapping("image/{id}")
-    public ResponseEntity<byte[]> getFoto(@PathVariable UUID id) {
-        return ResponseEntity.ok().body(pessoaService.getImage(id));
+    public ResponseEntity<?> getFoto(@PathVariable UUID id) {
+        byte[] imageBytes = pessoaService.getImage(id);
+        return ResponseEntity.ok().body(Base64.getEncoder().encodeToString(imageBytes));
     }
 }

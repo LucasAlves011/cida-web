@@ -19,7 +19,7 @@ public class Script {
     @Column(unique = true, nullable = false)
     private String titulo;
 
-    @Column(columnDefinition = "CHARACTER LARGE OBJECT", length = 40000)
+    @Column(columnDefinition = "TEXT")
     private String conteudo;
     private String descricao;
     private LocalDateTime dataCriacao;

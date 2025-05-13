@@ -58,7 +58,6 @@ public class SecurityConfiguration {
             .authorizeHttpRequests(auth -> auth
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     .requestMatchers("/cadastrar").permitAll()
-                    .requestMatchers("/h2-console/**").permitAll()
                     .requestMatchers("/favicon.ico").permitAll()
                     .requestMatchers("/image/**").permitAll()
                     .anyRequest().authenticated() // Exige JWT
