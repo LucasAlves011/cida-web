@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.mv</groupId>
     <artifactId>cida-web</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>cida-web</name>
     <description>Uma plataforma onde é possível guardar, descobrir e compartilhar scripts.</description>
     <url/>
@@ -22,7 +22,6 @@
             <id>luuke</id>
             <name>Lucas Matheus</name>
             <email>lucas.matheus@mv.com.br</email>
-            <url>http://www.example.com/jdoe</url>
             <organization>MV</organization>
             <organizationUrl>http://www.mv.com.br</organizationUrl>
             <roles>
