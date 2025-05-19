@@ -38,4 +38,10 @@ public class ComentarioController {
     public ResponseEntity<ComentarioDTO> curtirDescurtirComentario(@PathVariable Long comentario_id) throws ObjectNotFoundException {
         return ResponseEntity.ok().body(comentarioService.curtirDescurtirComentario(comentario_id));
     }
+
+    @DeleteMapping("/deletar/{comentario_id}")
+    public ResponseEntity<Boolean> deleteComentario(@PathVariable Long comentario_id) throws ObjectNotFoundException {
+        comentarioService.deleteComentario(comentario_id);
+        return ResponseEntity.ok(true);
+    }
 }

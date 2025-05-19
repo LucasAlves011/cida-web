@@ -30,8 +30,17 @@ public class Comentario {
     @JoinColumn(name = "script_id")
     private Script script;
 
-    @ManyToMany(mappedBy = "comentariosCurtidos",fetch = FetchType.EAGER)
+    @ManyToMany(mappedBy = "comentariosCurtidos",fetch = FetchType.EAGER,
+    cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<Pessoa> pessoasQueCurtiram = new ArrayList<>();
+
+    @PreRemove
+    private void removerRelacoes() {
+        for (Pessoa pessoa : pessoasQueCurtiram) {
+            pessoa.getComentariosCurtidos().remove(this);
+        }
+        pessoasQueCurtiram.clear();
+    }
 
     public void adicionarCurtida(Pessoa pessoa) {
         this.pessoasQueCurtiram.add(pessoa);

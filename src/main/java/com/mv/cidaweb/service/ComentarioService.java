@@ -4,6 +4,8 @@ import com.mv.cidaweb.model.beans.Comentario;
 import com.mv.cidaweb.model.dtos.ComentarioDTO;
 import com.mv.cidaweb.model.dtos.PessoaDTO;
 import com.mv.cidaweb.model.exceptions.ObjectNotFoundException;
+import com.mv.cidaweb.model.exceptions.PrivilegiosInsuficientesException;
+import com.mv.cidaweb.model.exceptions.StandardException;
 import com.mv.cidaweb.model.repository.ComentarioRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.security.core.Authentication;
@@ -15,6 +17,7 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class ComentarioService {
 
     private final ComentarioRepository comentarioRepository;
@@ -72,5 +75,21 @@ public class ComentarioService {
         var loginPessoa = SecurityContextHolder.getContext().getAuthentication().getName();
         var pessoa = pessoaService.findByLogin(loginPessoa).orElseThrow(() -> new ObjectNotFoundException(String.format("Pessoa com nome %s não encontrada", loginPessoa)));
         return comentario.getPessoasQueCurtiram().contains(pessoa);
+    }
+
+    public void deleteComentario(Long comentarioId) {
+        var comentario = comentarioRepository.findById(comentarioId).orElseThrow(() -> new ObjectNotFoundException(String.format("Comentário com id %d não encontrado", comentarioId)));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        var pessoa = pessoaService.findByLogin(authentication.getName()).orElseThrow(() -> new ObjectNotFoundException(String.format("Pessoa com nome %s não encontrada", authentication.getName())));
+        if (comentario.getAutor().getId() != pessoa.getId()) {
+            throw new PrivilegiosInsuficientesException("Não é possível deletar o comentário de outro usuário");
+        }
+//        try {
+            comentarioRepository.delete(comentario);
+
+//        }catch (Exception e){
+//            System.out.println(e);
+//        }
+
     }
 }

@@ -15,6 +15,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -52,25 +54,27 @@ public class SecurityConfiguration {
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
-            .cors(AbstractHttpConfigurer::disable)
-            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .securityMatcher("/**")
-            .authorizeHttpRequests(auth -> auth
-                    .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                    .requestMatchers("/cadastrar").permitAll()
-                    .requestMatchers("/favicon.ico").permitAll()
-                    .requestMatchers("/image/**").permitAll()
-                    .anyRequest().authenticated() // Exige JWT
+                .cors(AbstractHttpConfigurer::disable)
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .securityMatcher("/**")
+                .authorizeHttpRequests(auth -> auth
+                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                                .requestMatchers("/cadastrar").permitAll()
+                                .requestMatchers("/favicon.ico").permitAll()
+                                .requestMatchers("/image/**").permitAll()
+                                .anyRequest().authenticated() // Exige JWT
 //                    .anyRequest().permitAll() // Exige JWT
-            ).httpBasic(basic -> basic
-                    .authenticationEntryPoint(new BasicAuthEntryPoint()) // Configuração especial para /authenticate
-            ).anonymous(AbstractHttpConfigurer::disable)// Desabilita Basic Auth globalmente
-            .formLogin(AbstractHttpConfigurer::disable)
-            .addFilterBefore(new BasicAuthBlockerFilter(), BasicAuthenticationFilter.class) // Filtro customizado para bloquear Basic Auth em outras rotas
-            .oauth2ResourceServer(oauth2 -> oauth2 // Configura JWT para outras rotas
-                    .jwt(jwt -> jwt.decoder(jwtDecoder()))
-                    .authenticationEntryPoint(new JwtAuthEntryPoint())
-            );
+                ).httpBasic(basic -> basic
+                        .authenticationEntryPoint(new BasicAuthEntryPoint()) // Configuração especial para /authenticate
+                ).exceptionHandling(handling ->
+                        handling.authenticationEntryPoint(this::handleUnauthorized)
+                ).anonymous(AbstractHttpConfigurer::disable)// Desabilita Basic Auth globalmente
+                .formLogin(AbstractHttpConfigurer::disable)
+                .addFilterBefore(new BasicAuthBlockerFilter(), BasicAuthenticationFilter.class) // Filtro customizado para bloquear Basic Auth em outras rotas
+                .oauth2ResourceServer(oauth2 -> oauth2 // Configura JWT para outras rotas
+                        .jwt(jwt -> jwt.decoder(jwtDecoder()))
+                        .authenticationEntryPoint(new JwtAuthEntryPoint())
+                );
 
         return http.build();
     }
@@ -102,12 +106,32 @@ public class SecurityConfiguration {
         return source;
     }
 
+    private void handleUnauthorized(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
+        response.setContentType("application/json");
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+
+        String errorMessage = "Credenciais inválidas";
+
+        // Você pode personalizar mensagens para diferentes tipos de erros
+        if (authException instanceof BadCredentialsException) {
+            errorMessage = "Usuário ou senha incorretos";
+        } else if (authException instanceof InsufficientAuthenticationException) {
+            errorMessage = "Token de acesso inválido ou expirado";
+        }
+
+        response.getWriter().write(String.format(
+                "{\"error\": \"%s\", \"status\": %d}",
+                errorMessage,
+                HttpServletResponse.SC_UNAUTHORIZED
+        ));
+    }
+
     // Filtro para bloquear Basic Auth em rotas não autorizadas
     static class BasicAuthBlockerFilter extends OncePerRequestFilter {
         @Override
-        protected void doFilterInternal(HttpServletRequest request,HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-            if (request.getHeader("Authorization") != null &&  request.getHeader("Authorization").startsWith("Basic")
-                    && !request.getRequestURI().equals("/authenticate") ) {
+        protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+            if (request.getHeader("Authorization") != null && request.getHeader("Authorization").startsWith("Basic")
+                    && !request.getRequestURI().equals("/authenticate")) {
                 response.sendError(HttpStatus.FORBIDDEN.value(), "Autenticação Básica só permitida em /authenticate");
                 return;
             }
@@ -119,7 +143,7 @@ public class SecurityConfiguration {
     static class BasicAuthEntryPoint implements AuthenticationEntryPoint {
         @Override
         public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
-            if (request.getRequestURI().equals("/authenticate") ) {
+            if (request.getRequestURI().equals("/authenticate")) {
                 response.addHeader("WWW-Authenticate", "Basic realm=\"Realm\"");
                 response.sendError(HttpStatus.UNAUTHORIZED.value(), HttpStatus.UNAUTHORIZED.getReasonPhrase());
             } else {

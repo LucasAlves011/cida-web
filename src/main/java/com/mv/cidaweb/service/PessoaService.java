@@ -5,8 +5,11 @@ import com.mv.cidaweb.model.beans.UserRole;
 import com.mv.cidaweb.model.dtos.PessoaDTO;
 import com.mv.cidaweb.model.dtos.RegisterDTO;
 import com.mv.cidaweb.model.exceptions.CredenciaisInvalidasException;
+import com.mv.cidaweb.model.exceptions.ObjectNotFoundException;
 import com.mv.cidaweb.model.repository.PessoaRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +17,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -69,5 +73,12 @@ public class PessoaService {
             throw new RuntimeException("Erro ao ler a imagem: " + e.getMessage());
         }
 
+    }
+
+    public Map<String,String> getImageUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        var pessoa = findByLogin(authentication.getName()).orElseThrow(() -> new ObjectNotFoundException(String.format("Pessoa com nome %s não encontrada", authentication.getName())));
+        Map<String,String> map = Map.of( "nomeSobrenome", pessoa.getNome(), "idFoto", pessoa.getIdFoto());
+        return map;
     }
 }
