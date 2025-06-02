@@ -36,13 +36,19 @@ public class PessoaService {
     }
 
     public PessoaDTO cadastrarPessoa(RegisterDTO registerDTO, String idFoto) {
+
+        if(pessoaRepository.findByEmail(registerDTO.email()).isPresent()) {
+            throw new CredenciaisInvalidasException("Email já está sendo usado!");
+        }
+
         if (pessoaRepository.findByLogin(registerDTO.login()).isPresent()) {
             throw new CredenciaisInvalidasException("Login já está sendo usado!");
         }
+
         if (registerDTO.password() == null || registerDTO.password().isBlank() || registerDTO.password().length() < 5) {
             throw new CredenciaisInvalidasException("Senha inválida!");
         }
-        var pessoa = pessoaRepository.save(new Pessoa(registerDTO.nomeSobrenome(), registerDTO.login(), passwordEncoder.encode(registerDTO.password()), UserRole.USER, idFoto));
+        var pessoa = pessoaRepository.save(new Pessoa(registerDTO.nomeSobrenome().trim(), registerDTO.login().trim(), passwordEncoder.encode(registerDTO.password()), UserRole.USER,registerDTO.email().trim(), idFoto));
         return new PessoaDTO(pessoa.getNome(), pessoa.getIdFoto());
     }
 

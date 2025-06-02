@@ -36,9 +36,7 @@ public class Comentario {
 
     @PreRemove
     private void removerRelacoes() {
-        for (Pessoa pessoa : pessoasQueCurtiram) {
-            pessoa.getComentariosCurtidos().remove(this);
-        }
+        pessoasQueCurtiram.forEach(pessoa -> pessoa.getComentarios().remove(this));
         pessoasQueCurtiram.clear();
     }
 

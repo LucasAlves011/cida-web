@@ -1,6 +1,8 @@
 package com.mv.cidaweb.model.beans;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,19 +22,21 @@ public class Script {
     private String titulo;
 
     @Column(columnDefinition = "TEXT")
+    @NotBlank
+    @NotNull
     private String conteudo;
     private String descricao;
     private LocalDateTime dataCriacao;
     private LocalDateTime dataAtualizacao;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "autor_id")
     private Pessoa autor;
 
-    @ManyToMany(mappedBy = "scriptsCurtidos")
+    @ManyToMany(mappedBy = "scriptsCurtidos",  fetch = FetchType.LAZY)
     private List<Pessoa> pessoasQueCurtiram = new ArrayList<>();
 
-    @OneToMany(mappedBy = "script", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "script",  cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Comentario> comentarios = new ArrayList<>();
 
     public Script(String titulo, String conteudo, String descricao, LocalDateTime dataCriacao, Pessoa autor) {
@@ -42,6 +46,13 @@ public class Script {
         this.dataCriacao = dataCriacao;
         this.autor = autor;
     }
+
+//    @PreRemove
+//    private void removerRelacoes() {
+//        comentarios
+//        pessoasQueCurtiram.forEach(pessoa -> pessoa.getComentarios().remove(this));
+//        pessoasQueCurtiram.clear();
+//    }
 
     public Script() {
     }

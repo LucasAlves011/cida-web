@@ -32,29 +32,29 @@ public class ComentarioService {
 
     @Transactional
     public ComentarioDTO addComentario(String comentario, Long scriptId) {
-        var script = scriptService.findById(scriptId).orElseThrow(() -> new ObjectNotFoundException(String.format("Script com id %d não encontrado", scriptId)));
+        var script = scriptService.findById(scriptId).orElseThrow(() -> new ObjectNotFoundException(String.format("Script com idScript %d não encontrado", scriptId)));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         var pessoa = pessoaService.findByLogin(authentication.getName()).orElseThrow(() -> new ObjectNotFoundException(String.format("Pessoa com nome %s não encontrada", authentication.getName())));
-        var novoComentario = new Comentario(comentario, LocalDateTime.now(), pessoa);
+        var novoComentario = new Comentario(comentario.trim(), LocalDateTime.now(), pessoa);
         script.addComentario(novoComentario);
         scriptService.save(script);
         return new ComentarioDTO(pessoa.getId(), comentario, novoComentario.getDataHora(), new PessoaDTO(pessoa.getNome(), pessoa.getIdFoto()), 0, false);
     }
 
     public ArrayList<ComentarioDTO> getComentarios(Long scriptId) {
-        var script = scriptService.findById(scriptId).orElseThrow(() -> new ObjectNotFoundException(String.format("Script com id %d não encontrado", scriptId)));
+        var script = scriptService.findById(scriptId).orElseThrow(() -> new ObjectNotFoundException(String.format("Script com idScript %d não encontrado", scriptId)));
         return script.getComentarios().stream().map(a ->
                 new ComentarioDTO(a.getId().toString(), a.getComentario(), a.getDataHora(), new PessoaDTO(a.getAutor().getNome(), a.getAutor().getIdFoto()), a.getCurtidas(), verificarSePessoaCurtiuOuNao(a))
         ).collect(Collectors.toCollection(ArrayList::new));
     }
 
     public ComentarioDTO getComentario(Long comentario_id) {
-        var comentario = comentarioRepository.findById(comentario_id).orElseThrow(() -> new ObjectNotFoundException(String.format("Comentário com id %d não encontrado", comentario_id)));
+        var comentario = comentarioRepository.findById(comentario_id).orElseThrow(() -> new ObjectNotFoundException(String.format("Comentário com idScript %d não encontrado", comentario_id)));
         return new ComentarioDTO(comentario.getId().toString(), comentario.getComentario(), comentario.getDataHora(), new PessoaDTO(comentario.getAutor().getNome(), comentario.getAutor().getIdFoto()), comentario.getCurtidas(), verificarSePessoaCurtiuOuNao(comentario));
     }
 
     public ComentarioDTO curtirDescurtirComentario(Long comentarioId) {
-        var comentario = comentarioRepository.findById(comentarioId).orElseThrow(() -> new ObjectNotFoundException(String.format("Comentário com id %d não encontrado", comentarioId)));
+        var comentario = comentarioRepository.findById(comentarioId).orElseThrow(() -> new ObjectNotFoundException(String.format("Comentário com idScript %d não encontrado", comentarioId)));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         var pessoa = pessoaService.findByLogin(authentication.getName()).orElseThrow(() -> new ObjectNotFoundException(String.format("Pessoa com nome %s não encontrada", authentication.getName())));
 
@@ -78,7 +78,7 @@ public class ComentarioService {
     }
 
     public void deleteComentario(Long comentarioId) {
-        var comentario = comentarioRepository.findById(comentarioId).orElseThrow(() -> new ObjectNotFoundException(String.format("Comentário com id %d não encontrado", comentarioId)));
+        var comentario = comentarioRepository.findById(comentarioId).orElseThrow(() -> new ObjectNotFoundException(String.format("Comentário com idScript %d não encontrado", comentarioId)));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         var pessoa = pessoaService.findByLogin(authentication.getName()).orElseThrow(() -> new ObjectNotFoundException(String.format("Pessoa com nome %s não encontrada", authentication.getName())));
         if (comentario.getAutor().getId() != pessoa.getId()) {

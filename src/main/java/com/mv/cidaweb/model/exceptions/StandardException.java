@@ -11,6 +11,7 @@ public class StandardException {
     private LocalDateTime dataHoraUTC;
     private Integer status;
     private String message;
+    private int code;
 
     public StandardException(LocalDateTime data, Integer status, String message) {
         this.dataHoraUTC = data;
@@ -18,7 +19,10 @@ public class StandardException {
         this.message = message;
     }
 
-    public StandardException() {
-        super();
+    public StandardException(LocalDateTime data, Integer status, String message, int code) {
+        this.dataHoraUTC = data;
+        this.status = status;
+        this.message = message;
+        this.code = code;
     }
 }

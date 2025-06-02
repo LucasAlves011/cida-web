@@ -35,7 +35,7 @@ public class JwtService {
                 .build();
 
         var token =  encoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
-        return new TokenDTO(token, "jwt", TEMPO_DE_VIDA_TOKEN_SEGUNDOS);
+        return new TokenDTO(token, "Bearer", TEMPO_DE_VIDA_TOKEN_SEGUNDOS);
     }
 
 }

@@ -55,7 +55,7 @@ public class PessoaController {
             throw new RuntimeException(e);
         }
 
-        var pessoa = pessoaService.cadastrarPessoa(new RegisterDTO(nomeSobrenome, login, password, email), nomeImagem);
+        var pessoa = pessoaService.cadastrarPessoa(new RegisterDTO(nomeSobrenome, login, password, "1" ,email), nomeImagem);
 
         return ResponseEntity.ok().body(new PessoaDTO(pessoa.nome(), nomeImagem.replace(".png", "")));
     }

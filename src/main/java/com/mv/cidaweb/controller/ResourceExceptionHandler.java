@@ -25,14 +25,14 @@ public class ResourceExceptionHandler {
 
     @ExceptionHandler(PrivilegiosInsuficientesException.class)
     ResponseEntity<StandardException> privilegiosInsuficientes(PrivilegiosInsuficientesException e, ServletRequest request) {
-        StandardException error = new StandardException(LocalDateTime.now(ZoneId.of("UTC")), HttpStatus.NOT_FOUND.value()
+        StandardException error = new StandardException(LocalDateTime.now(ZoneId.of("UTC")), HttpStatus.UNAUTHORIZED.value()
                 , e.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
     }
 
     @ExceptionHandler(CredenciaisInvalidasException.class)
     ResponseEntity<StandardException> credenciaisInvalidasException(CredenciaisInvalidasException e, ServletRequest request) {
-        StandardException error = new StandardException(LocalDateTime.now(ZoneId.of("UTC")), HttpStatus.NOT_FOUND.value()
+        StandardException error = new StandardException(LocalDateTime.now(ZoneId.of("UTC")), HttpStatus.CONFLICT.value()
                 , e.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }

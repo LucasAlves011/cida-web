@@ -57,9 +57,9 @@ public class ScriptController {
         return ResponseEntity.ok().body(scriptService.getAllScriptsByAutor(nome));
     }
 
-    @PatchMapping("/{id}")
-    public ResponseEntity<ScriptDTO> updateScript(@RequestBody ScriptDTO scriptDTO, Long id) throws ObjectNotFoundException {
-        return ResponseEntity.ok().body(scriptService.updateScript(scriptDTO, id));
+    @PatchMapping("/id/{id}")
+    public ResponseEntity<ScriptDTO> updateScript(@RequestBody ScriptEntradaDTO scriptEntradaDTO, @PathVariable Long id) throws ObjectNotFoundException {
+        return ResponseEntity.ok().body(scriptService.updateScript(scriptEntradaDTO, id));
     }
 
     @PostMapping("/salvar")
@@ -71,6 +71,11 @@ public class ScriptController {
     @PostMapping("/curtir-descurtir/{script_id}")
     public ResponseEntity<ScriptDTO> curtirDescurtirScript(@PathVariable Long script_id) throws ObjectNotFoundException {
         return ResponseEntity.ok().body(scriptService.curtirDescurtirScript(script_id));
+    }
+
+    @DeleteMapping("/id/{id}")
+    public ResponseEntity<Boolean> deleteScript(@PathVariable Long id) throws ObjectNotFoundException {
+        return ResponseEntity.ok().body(scriptService.deleteScript(id));
     }
 
 }
