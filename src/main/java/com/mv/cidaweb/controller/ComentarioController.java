@@ -41,7 +41,7 @@ public class ComentarioController {
 
     @DeleteMapping("/deletar/{comentario_id}")
     public ResponseEntity<Boolean> deleteComentario(@PathVariable Long comentario_id) throws ObjectNotFoundException {
-        comentarioService.deleteComentario(comentario_id);
+        comentarioService.deleteComentario(comentario_id,false);
         return ResponseEntity.ok(true);
     }
 }

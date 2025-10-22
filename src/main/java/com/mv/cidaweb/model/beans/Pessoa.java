@@ -25,6 +25,9 @@ public class Pessoa {
     private UserRole role;
     private String idFoto;
 
+    @Column(length = 1000)
+    private String tokenPermanent;
+
     @Column(unique = true)
     private String email;
 

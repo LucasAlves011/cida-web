@@ -28,6 +28,7 @@ public class Script {
     private String descricao;
     private LocalDateTime dataCriacao;
     private LocalDateTime dataAtualizacao;
+    private boolean privado;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "autor_id")
@@ -39,20 +40,14 @@ public class Script {
     @OneToMany(mappedBy = "script",  cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Comentario> comentarios = new ArrayList<>();
 
-    public Script(String titulo, String conteudo, String descricao, LocalDateTime dataCriacao, Pessoa autor) {
+    public Script(String titulo, String conteudo, String descricao, LocalDateTime dataCriacao, Pessoa autor, boolean privado) {
         this.titulo = titulo;
         this.conteudo = conteudo;
         this.descricao = descricao;
         this.dataCriacao = dataCriacao;
         this.autor = autor;
+        this.privado = privado;
     }
-
-//    @PreRemove
-//    private void removerRelacoes() {
-//        comentarios
-//        pessoasQueCurtiram.forEach(pessoa -> pessoa.getComentarios().remove(this));
-//        pessoasQueCurtiram.clear();
-//    }
 
     public Script() {
     }

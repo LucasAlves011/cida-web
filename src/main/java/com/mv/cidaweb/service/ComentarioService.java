@@ -53,6 +53,10 @@ public class ComentarioService {
         return new ComentarioDTO(comentario.getId().toString(), comentario.getComentario(), comentario.getDataHora(), new PessoaDTO(comentario.getAutor().getNome(), comentario.getAutor().getIdFoto()), comentario.getCurtidas(), verificarSePessoaCurtiuOuNao(comentario));
     }
 
+    public Comentario save(Comentario comentario){
+        return comentarioRepository.save(comentario);
+    }
+
     public ComentarioDTO curtirDescurtirComentario(Long comentarioId) {
         var comentario = comentarioRepository.findById(comentarioId).orElseThrow(() -> new ObjectNotFoundException(String.format("Comentário com idScript %d não encontrado", comentarioId)));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -77,19 +81,16 @@ public class ComentarioService {
         return comentario.getPessoasQueCurtiram().contains(pessoa);
     }
 
-    public void deleteComentario(Long comentarioId) {
-        var comentario = comentarioRepository.findById(comentarioId).orElseThrow(() -> new ObjectNotFoundException(String.format("Comentário com idScript %d não encontrado", comentarioId)));
+    public void deleteComentario(Long comentarioId, boolean isScriptBeingDeleted) {
+        var comentario = comentarioRepository.findById(comentarioId)
+                .orElseThrow(() -> new ObjectNotFoundException(String.format("Comentário com idScript %d não encontrado", comentarioId)));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        var pessoa = pessoaService.findByLogin(authentication.getName()).orElseThrow(() -> new ObjectNotFoundException(String.format("Pessoa com nome %s não encontrada", authentication.getName())));
-        if (comentario.getAutor().getId() != pessoa.getId()) {
+        var pessoa = pessoaService.findByLogin(authentication.getName())
+                .orElseThrow(() -> new ObjectNotFoundException(String.format("Pessoa com nome %s não encontrada", authentication.getName())));
+
+        if (!isScriptBeingDeleted && comentario.getAutor().getId() != pessoa.getId()) {
             throw new PrivilegiosInsuficientesException("Não é possível deletar o comentário de outro usuário");
         }
-//        try {
-            comentarioRepository.delete(comentario);
-
-//        }catch (Exception e){
-//            System.out.println(e);
-//        }
-
+        comentarioRepository.delete(comentario);
     }
 }

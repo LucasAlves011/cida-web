@@ -1,5 +1,6 @@
 package com.mv.cidaweb.config.security;
 
+import com.mv.cidaweb.model.repository.PessoaRepository;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
@@ -17,11 +18,13 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -51,6 +54,12 @@ public class SecurityConfiguration {
     @Value("${jwt.private.key}")
     private RSAPrivateKey priv;
 
+    private final PessoaRepository pessoaRepository;
+
+    public SecurityConfiguration(PessoaRepository pessoaRepository) {
+        this.pessoaRepository = pessoaRepository;
+    }
+
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
@@ -58,20 +67,20 @@ public class SecurityConfiguration {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .securityMatcher("/**")
                 .authorizeHttpRequests(auth -> auth
-                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                                .requestMatchers("/cadastrar").permitAll()
-                                .requestMatchers("/favicon.ico").permitAll()
-                                .requestMatchers("/image/**").permitAll()
-                                .anyRequest().authenticated() // Exige JWT
-//                    .anyRequest().permitAll() // Exige JWT
-                ).httpBasic(basic -> basic
-                        .authenticationEntryPoint(new BasicAuthEntryPoint()) // Configuração especial para /authenticate
-                ).exceptionHandling(handling ->
-                        handling.authenticationEntryPoint(this::handleUnauthorized)
-                ).anonymous(AbstractHttpConfigurer::disable)// Desabilita Basic Auth globalmente
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/cadastrar").permitAll()
+                        .requestMatchers("/favicon.ico").permitAll()
+                        .requestMatchers("/image/**").permitAll()
+                        .requestMatchers("/script/nome/**").authenticated()
+                        .anyRequest().authenticated()
+                )
+                .httpBasic(basic -> basic.authenticationEntryPoint(new BasicAuthEntryPoint()))
+                .exceptionHandling(handling -> handling.authenticationEntryPoint(this::handleUnauthorized))
+                .anonymous(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
-                .addFilterBefore(new BasicAuthBlockerFilter(), BasicAuthenticationFilter.class) // Filtro customizado para bloquear Basic Auth em outras rotas
-                .oauth2ResourceServer(oauth2 -> oauth2 // Configura JWT para outras rotas
+                .addFilterBefore(new PermanentJwtFilter(pessoaRepository), BasicAuthenticationFilter.class)
+                .addFilterBefore(new BasicAuthBlockerFilter(), BasicAuthenticationFilter.class)
+                .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.decoder(jwtDecoder()))
                         .authenticationEntryPoint(new JwtAuthEntryPoint())
                 );
@@ -130,6 +139,19 @@ public class SecurityConfiguration {
         ));
     }
 
+
+    // EntryPoint customizado para Basic Auth
+    static class BasicAuthEntryPoint implements AuthenticationEntryPoint {
+        @Override
+        public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
+            if (request.getRequestURI().equals("/authenticate")) {
+                response.addHeader("WWW-Authenticate", "Basic realm=\"Realm\"");
+                response.sendError(HttpStatus.UNAUTHORIZED.value(), HttpStatus.UNAUTHORIZED.getReasonPhrase());
+            } else {
+                response.sendError(HttpStatus.FORBIDDEN.value(), "Basic Auth não permitido nesta rota");
+            }
+        }
+    }
     // Filtro para bloquear Basic Auth em rotas não autorizadas
     static class BasicAuthBlockerFilter extends OncePerRequestFilter {
         @Override
@@ -143,16 +165,47 @@ public class SecurityConfiguration {
         }
     }
 
-    // EntryPoint customizado para Basic Auth
-    static class BasicAuthEntryPoint implements AuthenticationEntryPoint {
+    // FILTRO TOKEN PERMANENTE – apenas para rotas permitidas
+    static class PermanentJwtFilter extends OncePerRequestFilter {
+
+        private final PessoaRepository pessoaRepository;
+
+        public PermanentJwtFilter(PessoaRepository pessoaRepository) {
+            this.pessoaRepository = pessoaRepository;
+        }
+
+        // define rotas que aceitam token permanente
+        private boolean isPermanentTokenAllowed(String uri) {
+            return uri.startsWith("/script/nome"); // adicione outras se necessário
+        }
+
         @Override
-        public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
-            if (request.getRequestURI().equals("/authenticate")) {
-                response.addHeader("WWW-Authenticate", "Basic realm=\"Realm\"");
-                response.sendError(HttpStatus.UNAUTHORIZED.value(), HttpStatus.UNAUTHORIZED.getReasonPhrase());
-            } else {
-                response.sendError(HttpStatus.FORBIDDEN.value(), "Basic Auth não permitido nesta rota");
+        protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+            String authHeader = request.getHeader("Authorization");
+            String requestURI = request.getRequestURI();
+
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                String token = authHeader.substring(7);
+
+                // verifica se é um token permanente
+                var pessoaOpt = pessoaRepository.findAll().stream()
+                        .filter(p -> token.equals(p.getTokenPermanent()))
+                        .findFirst();
+
+                if (pessoaOpt.isPresent()) {
+                    // se a rota NÃO permite token permanente, retorna exceção
+                    if (!isPermanentTokenAllowed(requestURI)) {
+                        response.sendError(HttpStatus.FORBIDDEN.value(), "Token permanente não permitido nesta rota");
+                        return; // interrompe o filtro
+                    }
+
+                    // rota permitida, autentica
+                    var p = pessoaOpt.get();
+                    var auth = new UsernamePasswordAuthenticationToken(p.getLogin(), null, null);
+                    SecurityContextHolder.getContext().setAuthentication(auth);
+                }
             }
+            filterChain.doFilter(request, response);
         }
     }
 

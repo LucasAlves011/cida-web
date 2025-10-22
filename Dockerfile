@@ -1,30 +1,16 @@
-# Estágio de build - usa imagem com Maven/Gradle e JDK
-FROM amazoncorretto:23-alpine as builder
+# Imagem base com Amazon Corretto 24 (versão Alpine para tamanho reduzido)
+FROM amazoncorretto:24-alpine-jdk
 
 WORKDIR /app
 
-# Copia os arquivos do projeto
-COPY pom.xml .
-COPY src ./src
+COPY target/*.jar app.jar
 
-# Instala o Maven (para projetos Maven)
-RUN apk add --no-cache maven && \
-    mvn clean package
+# Configurações de segurança - usuário não-root
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+USER appuser:appgroup
 
-# Estágio final - usa imagem mínima apenas com JRE
-FROM amazoncorretto:23-alpine-jre
-
-WORKDIR /app
-
-# Copia o JAR do estágio de build
-COPY --from=builder /app/target/sua-aplicacao.jar app.jar
-
-# Expõe a porta
+# Porta que a aplicação expõe (ajuste conforme necessário)
 EXPOSE 8080
 
-# Define variáveis de ambiente
-ENV JAVA_OPTS=""
-ENV APP_ENV="production"
-
-# Comando de execução
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
+# Comando de execução (pode adicionar parâmetros JVM aqui)
+ENTRYPOINT ["java", "-jar", "app.jar"]

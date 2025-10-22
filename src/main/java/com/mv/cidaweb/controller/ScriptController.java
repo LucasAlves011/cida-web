@@ -57,6 +57,11 @@ public class ScriptController {
         return ResponseEntity.ok().body(scriptService.getAllScriptsByAutor(nome));
     }
 
+    @GetMapping("/verificar-autor/{scriptId}")
+    public ResponseEntity<Boolean> verificarSeScriptEDoUsuarioLogado(@PathVariable Long scriptId) throws ObjectNotFoundException {
+        return ResponseEntity.ok().body(scriptService.verificarSeScriptEDoUsuarioLogado(scriptId));
+    }
+
     @PatchMapping("/id/{id}")
     public ResponseEntity<ScriptDTO> updateScript(@RequestBody ScriptEntradaDTO scriptEntradaDTO, @PathVariable Long id) throws ObjectNotFoundException {
         return ResponseEntity.ok().body(scriptService.updateScript(scriptEntradaDTO, id));

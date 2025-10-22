@@ -19,4 +19,9 @@ public class AuthenticationController {
     public TokenDTO authenticate(Authentication authentication) {
         return authenticationService.authenticate(authentication);
     }
+
+    @GetMapping("/permanent-token")
+    public TokenDTO generatePermanentToken(Authentication authentication) {
+        return authenticationService.generateTokenPermanente(authentication);
+    }
 }
